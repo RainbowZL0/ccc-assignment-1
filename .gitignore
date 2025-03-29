@@ -9,6 +9,11 @@ wheels/
 # Virtual environments
 .venv
 .idea
+
+.nfs*
+*.out
+*.slurm
+
 a001_eg_from_uni
 
 a003_data/a001_raw/*

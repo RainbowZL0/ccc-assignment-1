@@ -7,7 +7,7 @@ RAW_DATA_FOLDER = DATA_FOLDER / "a001_raw"
 FILTERED_DATA_FOLDER = DATA_FOLDER / "a002_filtered"
 TEST_DATA_FOLDER = DATA_FOLDER / "a003_test"
 
-NDJSON_FILE_NAME_TO_LOAD = r"mastodon-106k.ndjson"
+NDJSON_FILE_NAME_TO_LOAD = r"mastodon-144g.ndjson"
 line_num_info = {
     "mastodon-106k.ndjson": 30,
     "mastodon-16m.ndjson": 4500,
