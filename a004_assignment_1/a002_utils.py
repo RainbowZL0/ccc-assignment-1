@@ -1,7 +1,11 @@
+import functools
 import json
+import time
 from datetime import datetime
 from math import ceil
 from pathlib import Path
+
+from mpi4py import MPI
 
 
 def load_ndjson_file(
@@ -286,6 +290,17 @@ def load_ndjson_file_by_process(
             records.append(record)
 
     return records
+
+
+def measure_time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = MPI.Wtime()
+        result = func(*args, **kwargs)
+        end = MPI.Wtime()
+        running_info = f"{func.__name__}: {round(end - start, 5)}"
+        return result, running_info
+    return wrapper
 
 
 def tst():
