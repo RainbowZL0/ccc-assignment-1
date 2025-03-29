@@ -1,5 +1,4 @@
 import json
-import pprint
 from datetime import datetime
 from math import ceil
 from pathlib import Path
@@ -228,7 +227,7 @@ def join_list_pieces(lst):
     return result
 
 
-def join_dict_pieces(lst, mode="sum"):
+def join_dict_pieces_hour_score(lst, mode="sum"):
     """合并多个字典（按 key 聚合 value）。
 
     Args:
@@ -261,17 +260,38 @@ def dict_to_list_of_tuples(dic):
     return [(k, v) for k, v in dic.items()]
 
 
-def get_info_of_144g():
-    with open(r"a003_data/a001_raw/mastodon-144g.ndjson", "r", encoding="utf-8") as f0:
-        line_cnt = sum(1 for line in f0)
-        print(line_cnt)
+def load_ndjson_file_by_process(
+        ndjson_path_for_loading,
+        ndjson_line_num,
+        process_num,
+        r,
+        use_filter=False,
+):
+    num_line_per_process = ceil(ndjson_line_num / process_num)
+    # [start, end) is retrieved, and the first line of the file is counted from 1
+    start_line = r * num_line_per_process + 1
+    end_line = min(start_line + num_line_per_process, int(ndjson_line_num + 1))
+
+    records = []
+    with open(ndjson_path_for_loading, "r", encoding="utf-8") as f0:
+        # 跳过前面的行
+        for _ in range(start_line - 1):
+            next(f0)
+        # 读取所需行
+        for _ in range(start_line, end_line):
+            line = next(f0).strip()
+            record: dict = json.loads(line)  # ndjson的特点是每行一条数据
+            if use_filter:
+                record = filter_a_record(record)
+            records.append(record)
+
+    return records
 
 
 def tst():
-    lst = [i for i in range(10)]
-    pprint.pprint(split_list(lst, 3))
+    pass
 
 
 if __name__ == '__main__':
-    # get_info_of_144g()
+    # load_ndjson_file_by_process()
     tst()
