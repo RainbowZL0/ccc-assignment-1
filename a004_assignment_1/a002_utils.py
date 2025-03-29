@@ -51,7 +51,14 @@ def filter_a_record(record: dict):
             "sentiment": doc.get("sentiment"),
             "account": {
                 key: account.get(key)
-                for key in ("id", "username", "acct", "uri", "url", "displayName")
+                for key in (
+                    "id",
+                    "username",
+                    # "acct",
+                    # "uri",
+                    # "url",
+                    # "displayName",
+                )
             },
         }
     }

@@ -76,6 +76,10 @@ def mpi_v2():
         r=RANK,
         use_filter=True,
     )
+    # write_data_to_ndjson(
+    #     records=records,
+    #     target_path=FILTERED_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD,
+    # )
     print(f"1. rank={RANK}, 节点读取数据结束")
 
     hour_score = aggregate_score_by_hour(records)
