@@ -299,6 +299,46 @@ def load_ndjson_file_by_process(
     return records
 
 
+def load_ndjson_file_by_process_and_calcu_score_at_the_same_time(
+        ndjson_path_for_loading,
+        ndjson_line_num,
+        process_num,
+        r,
+        use_filter=False,
+):
+    num_line_per_process = ceil(ndjson_line_num / process_num)
+    # [start, end) is retrieved, and the first line of the file is counted from 1
+    start_line = r * num_line_per_process + 1
+    end_line = min(start_line + num_line_per_process, int(ndjson_line_num + 1))
+
+    time_s_score: dict = {}
+    with open(ndjson_path_for_loading, "r", encoding="utf-8") as f0:
+        # 跳过前面的行
+        for _ in range(start_line - 1):
+            next(f0)
+        # 读取所需行
+        for _ in range(start_line, end_line):
+            line = next(f0).strip()
+            record: dict = json.loads(line)  # ndjson的特点是每行一条数据
+            if use_filter:
+                record = filter_a_record(record)
+
+            """
+            直接清洗
+            格式化时间，提取分数
+            """
+            created_hour: str = high_level_api_to_convert_raw_time_to_preferred_str(
+                record["doc"]["createdAt"]
+            )
+            sentiment_score = record["doc"]["sentiment"]
+
+            if not time_s_score.get(created_hour):
+                time_s_score[created_hour] = 0.0
+            time_s_score[created_hour] += sentiment_score
+
+    return time_s_score
+
+
 def measure_time(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
