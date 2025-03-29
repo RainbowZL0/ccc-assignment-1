@@ -41,36 +41,8 @@ def mpi_v1():
 
         records = split_list(lst=records, pieces_num=SIZE)
         print(f"2. rank={RANK}, 数据分片结束")
-
-        # received_msg = comm.scatter(records, root=0)
-        # hour_score: dict = aggregate_score_by_hour(received_msg)
-
-        # target_name = get_ndjson_name_by_rank(
-        #     original_name=NDJSON_FILE_NAME_TO_LOAD,
-        #     r=rank,
-        # )
-        # target_path = TEST_DATA_FOLDER / target_name
-        # write_data_to_ndjson(
-        #     records=hour_score,
-        #     target_path=target_path
-        # )
-
-        # gathered_msg = comm.gather(hour_score, root=0)
     else:
         records = None
-        # received_msg = comm.scatter(None, root=0)
-        # hour_score = aggregate_score_by_hour(received_msg)
-        #
-        # target_name = get_ndjson_name_by_rank(
-        #     original_name=NDJSON_FILE_NAME_TO_LOAD,
-        #     r=rank,
-        # )
-        # target_path = TEST_DATA_FOLDER / target_name
-        # write_data_to_ndjson(
-        #     records=hour_score,
-        #     target_path=target_path
-        # )
-        # _ = comm.gather(hour_score, root=0)
 
     received_msg = COMM.scatter(records, root=0)
     print("3. rank={RANK}, 分发数据结束")
