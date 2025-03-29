@@ -7,6 +7,7 @@ from math import ceil
 from pathlib import Path
 
 from mpi4py import MPI
+from tqdm import tqdm
 
 
 def load_ndjson_file(
@@ -25,14 +26,24 @@ def load_ndjson_file(
     records: list = []
     with open(ndjson_path_for_loading, "r", encoding="utf-8") as f:
         for line in f:
-            line = line.strip()  # 去除两端空白字符
-            if not line:  # 跳过空行
-                continue
-            record: dict = json.loads(line)  # ndjson的特点是每行一条数据
-            if use_filter:
-                record = filter_a_record(record)
+            record = parse_one_line(line, use_filter=use_filter)
             records.append(record)
     return records
+
+
+def parse_one_line(line, use_filter):
+    if not line:
+        return
+    line = line.strip()
+    record = json.loads(line)
+    if use_filter:
+        record = filter_a_record(record)
+    return record
+
+
+def dict_to_a_line(dic):
+    line = json.dumps(dic, ensure_ascii=False)
+    return f"{line}\n"
 
 
 def filter_a_record(record: dict):
@@ -79,8 +90,9 @@ def write_data_to_ndjson(
         records = [records]
     with open(target_path, "w", encoding="utf-8") as f:
         for record in records:
-            json_line = json.dumps(record, ensure_ascii=False)
-            f.write(json_line + "\n")
+            f.write(
+                dict_to_a_line(record)
+            )
 
 
 def high_level_api_to_filter_ndjson_and_save(
@@ -199,8 +211,11 @@ def get_ndjson_name_by_rank(original_name, r):
     Returns:
         str: 带编号的新文件名。
     """
-    path = Path(original_name)
-    return path.stem + f"_r-{r}" + path.suffix
+    if not isinstance(original_name, Path):
+        new_name = Path(original_name)
+    else:
+        new_name = original_name
+    return new_name.stem + f"_r-{r}" + new_name.suffix
 
 
 def split_list(lst, pieces_num):
@@ -291,10 +306,8 @@ def load_ndjson_file_by_process(
             next(f0)
         # 读取所需行
         for _ in range(start_line, end_line):
-            line = next(f0).strip()
-            record: dict = json.loads(line)  # ndjson的特点是每行一条数据
-            if use_filter:
-                record = filter_a_record(record)
+            line = next(f0)
+            record: dict = parse_one_line(line, use_filter=use_filter)
             records.append(record)
 
     return records
@@ -320,10 +333,8 @@ def load_ndjson_file_by_process_and_calcu_score_at_the_same_time(
             next(f0)
         # 读取所需行
         for i in range(start_line, end_line):
-            line = next(f0).strip()
-            record: dict = json.loads(line)  # ndjson的特点是每行一条数据
-            if use_filter:
-                record = filter_a_record(record)
+            line = next(f0)
+            record = parse_one_line(line, use_filter=use_filter)
 
             """
             直接清洗
@@ -360,8 +371,47 @@ def measure_time(func):
     return wrapper
 
 
+def split_file(
+        file_path,
+        total_line_num,
+        to_pieces_num,
+        output_folder,
+        use_filter=False
+):
+    if not isinstance(file_path, Path):
+        file_path = Path(file_path)
+    if not isinstance(output_folder, Path):
+        output_folder = Path(output_folder)
+
+    lines_per_file = ceil(total_line_num / to_pieces_num)
+    with open(file_path, "r", encoding="utf-8") as f0:
+        for i in tqdm(range(to_pieces_num)):
+            if i < to_pieces_num - 1:
+                lines_for_file_i = lines_per_file
+            else:
+                lines_for_file_i = total_line_num - i * lines_per_file
+
+            output_filename = f"{file_path.stem}_piece_{i}{file_path.suffix}"
+            output_path = output_folder / output_filename
+
+            with open(output_path, "w", encoding="utf-8") as f1:
+                for j in tqdm(range(lines_for_file_i)):
+                    line = next(f0)
+                    try:
+                        record = parse_one_line(line, use_filter=use_filter)
+                        write_line = dict_to_a_line(record)
+                        f1.write(write_line)
+                    except Exception as e:
+                        cur_line_num = i * lines_per_file + j + 1
+                        print(f"At line {cur_line_num}, an exception occurred, {e}:")
+                        traceback.print_exc()
+                        pprint.pprint(record)
+                        continue
+
+
 def tst():
-    pass
+    for _ in tqdm(range(int(1e8))):
+        pass
 
 
 if __name__ == '__main__':

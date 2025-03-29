@@ -8,4 +8,5 @@ dependencies = [
     "mpi4py>=4.0.3",
     "natsort>=8.4.0",
     "numpy>=2.2.4",
+    "tqdm>=4.67.1",
 ]

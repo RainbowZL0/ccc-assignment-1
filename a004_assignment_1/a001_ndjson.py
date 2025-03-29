@@ -6,7 +6,7 @@ from a004_assignment_1.a000_CFG import (
     SIZE,
     RANK,
     TEST_DATA_FOLDER,
-    COMM, NDJSON_LINE_NUM,
+    COMM, NDJSON_TOTAL_LINE_NUM, PIECES_DATA_FOLDER,
 )
 from a004_assignment_1.a002_utils import (
     write_data_to_ndjson,
@@ -15,7 +15,7 @@ from a004_assignment_1.a002_utils import (
     split_list,
     join_dict_pieces_hour_score,
     load_ndjson_file_by_process,
-    measure_time, load_ndjson_file_by_process_and_calcu_score_at_the_same_time,
+    measure_time, load_ndjson_file_by_process_and_calcu_score_at_the_same_time, split_file,
 )
 
 
@@ -67,7 +67,7 @@ def mpi_v1():
 def mpi_v2():
     """所有进程同时开始读取数据"""
     ndjson_path = RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD
-    ndjson_line_num = NDJSON_LINE_NUM
+    ndjson_line_num = NDJSON_TOTAL_LINE_NUM
 
     records = load_ndjson_file_by_process(
         ndjson_path_for_loading=ndjson_path,
@@ -102,7 +102,7 @@ def mpi_v2():
 def mpi_v3():
     """所有进程同时开始读取数据，且读取过程中就计算分数"""
     ndjson_path = RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD
-    ndjson_line_num = NDJSON_LINE_NUM
+    ndjson_line_num = NDJSON_TOTAL_LINE_NUM
 
     hour_score, failure_records = load_ndjson_file_by_process_and_calcu_score_at_the_same_time(
         ndjson_path_for_loading=ndjson_path,
@@ -143,43 +143,17 @@ def measure_mpi(func):
         func()
 
 
-# noinspection PyUnusedLocal
-def tst_load_ndjson_file_by_process():
-    ndjson_path = RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD
-    ndjson_line_num = NDJSON_LINE_NUM
-
-    records_0 = load_ndjson_file_by_process(
-        ndjson_path_for_loading=ndjson_path,
-        ndjson_line_num=ndjson_line_num,
-        process_num=4,
-        r=0,
+def call_split_file():
+    split_file(
+        file_path=RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD,
+        total_line_num=NDJSON_TOTAL_LINE_NUM,
+        to_pieces_num=8,
+        output_folder=PIECES_DATA_FOLDER,
         use_filter=True,
     )
-    records_1 = load_ndjson_file_by_process(
-        ndjson_path_for_loading=ndjson_path,
-        ndjson_line_num=ndjson_line_num,
-        process_num=4,
-        r=1,
-        use_filter=True,
-    )
-    records_2 = load_ndjson_file_by_process(
-        ndjson_path_for_loading=ndjson_path,
-        ndjson_line_num=ndjson_line_num,
-        process_num=4,
-        r=2,
-        use_filter=True,
-    )
-    records_3 = load_ndjson_file_by_process(
-        ndjson_path_for_loading=ndjson_path,
-        ndjson_line_num=ndjson_line_num,
-        process_num=4,
-        r=3,
-        use_filter=True,
-    )
-    pass
 
 
 if __name__ == "__main__":
     # mpi_v1()
-    # tst_load_ndjson_file_by_process()
     measure_mpi(mpi_v3)
+    print("Process finished.")
