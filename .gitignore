@@ -10,5 +10,11 @@ wheels/
 .venv
 .idea
 a001_eg_from_uni
+
 a003_data/a001_raw/*
+a003_data/a002_filtered/*
+a003_data/a003_test/*
+
 !a003_data/a001_raw/.gitkeep
+!a003_data/a002_filtered/.gitkeep
+!a003_data/a003_test/.gitkeep

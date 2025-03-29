@@ -8,6 +8,12 @@ FILTERED_DATA_FOLDER = DATA_FOLDER / "a002_filtered"
 TEST_DATA_FOLDER = DATA_FOLDER / "a003_test"
 
 NDJSON_FILE_NAME_TO_LOAD = r"mastodon-106k.ndjson"
+line_num_info = {
+    "mastodon-106k.ndjson": 30,
+    "mastodon-16m.ndjson": 4500,
+    "mastodon-144g.ndjson": int(42e6),
+}
+NDJSON_LINE_NUM = line_num_info[NDJSON_FILE_NAME_TO_LOAD]
 
 COMM = MPI.COMM_WORLD
 RANK = COMM.Get_rank()

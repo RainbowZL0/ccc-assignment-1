@@ -6,7 +6,7 @@ from a004_assignment_1.a000_CFG import (
     SIZE,
     RANK,
     TEST_DATA_FOLDER,
-    COMM,
+    COMM, NDJSON_LINE_NUM,
 )
 from a004_assignment_1.a002_utils import (
     write_data_to_ndjson,
@@ -30,7 +30,7 @@ def start_one_core():
     pprint.pprint(aggregate_score_by_hour(records))
 
 
-def start_mpi_v1():
+def mpi_v1():
     """主进程读取全部数据，然后分发给工作进程"""
     if RANK == 0:
         records: list | None = load_ndjson_file(
@@ -82,11 +82,10 @@ def start_mpi_v1():
         )
 
 
-@measure_time
-def start_mpi_v2():
+def mpi_v2():
     """所有进程同时开始读取数据"""
     ndjson_path = RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD
-    ndjson_line_num = 30
+    ndjson_line_num = NDJSON_LINE_NUM
 
     records = load_ndjson_file_by_process(
         ndjson_path_for_loading=ndjson_path,
@@ -107,10 +106,17 @@ def start_mpi_v2():
         )
 
 
+def measure_mpi_v2():
+    if RANK == 0:
+        print(measure_time(mpi_v2)())
+    else:
+        mpi_v2()
+
+
 # noinspection PyUnusedLocal
 def tst_load_ndjson_file_by_process():
     ndjson_path = RAW_DATA_FOLDER / NDJSON_FILE_NAME_TO_LOAD
-    ndjson_line_num = 30
+    ndjson_line_num = NDJSON_LINE_NUM
 
     records_0 = load_ndjson_file_by_process(
         ndjson_path_for_loading=ndjson_path,
@@ -144,7 +150,6 @@ def tst_load_ndjson_file_by_process():
 
 
 if __name__ == "__main__":
-    # start_mpi_v1()
+    # mpi_v1()
     # tst_load_ndjson_file_by_process()
-    print(start_mpi_v2())
-    # print(123)
+    measure_mpi_v2()
