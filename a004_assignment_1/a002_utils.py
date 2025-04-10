@@ -445,8 +445,8 @@ def mpi_v4_subprocess(file_path, use_filter=False):
             except Exception as e:
                 # If the record is missing key fields or another error occurs, add it to the failed list.
                 print(f"[{file_path}] Error processing line {idx}: {e}")
-                traceback.print_exc()
-                pprint.pprint(record)
+                # traceback.print_exc()
+                # pprint.pprint(record)
                 failed_records.append(record)
                 continue  # Skip to the next line
             else:
