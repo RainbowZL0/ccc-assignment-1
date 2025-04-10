@@ -15,6 +15,7 @@ wheels/
 #*.slurm
 
 a001_eg_from_uni
+a002_grammar_test
 
 a003_data/a001_raw/*
 a003_data/a002_filtered/*
