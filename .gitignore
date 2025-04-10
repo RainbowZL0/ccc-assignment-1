@@ -12,7 +12,7 @@ wheels/
 
 .nfs*
 *.out
-*.slurm
+#*.slurm
 
 a001_eg_from_uni
 
